@@ -85,7 +85,7 @@ FocusScope {
 
     Process {
         id: themesProc
-        command: ["sh", "-c", 'd="${XDG_DATA_HOME:-$HOME/.local/share}/frameshell/cli/themes"; jq -c -n \'[inputs | { id: (input_filename | split("/") | last | rtrimstr(".json")), name, colors }]\' "$d"/*.json']
+        command: ["sh", "-c", 'd="${XDG_DATA_HOME:-$HOME/.local/share}/frameshell/cli/themes/tui"; jq -c -n \'[inputs | { id: (input_filename | split("/") | last | rtrimstr(".json")), name, colors }]\' "$d"/*.json']
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
