@@ -6,7 +6,7 @@ import Quickshell.Wayland
 import qs.config
 import qs.services
 
-// Keyboard app on the focused screen: lighting, Fn keys and per-key colors of the AULA F75.
+// Keyboard app on the focused screen: lighting, Fn keys and per-key colors of the picked board.
 // `qs ipc call keyboard toggle` (Super+K), also `open` and `close`.
 Scope {
     id: root

@@ -4,7 +4,8 @@ import qs.components
 import qs.config
 import qs.services
 
-// Keyboard app UI: the F75 as a map on top, below it three tabs (lighting, fn keys, colors),
+// Keyboard app UI: the picked board as a map on top (its rows come from the board registry,
+// frame-keyboard board --json), below it the tabs the board can do (lighting, fn keys, colors),
 // at the bottom what the last command sent (or, in a dry run, would have sent).
 // Keys carry their physical id (US names) and a QWERTZ label.
 Item {
@@ -30,11 +31,14 @@ Item {
     property string paintColor: Theme.primary.toString()
     property int keyBrightness: 4
 
-    readonly property int unit: 48
+    // Key size: 48 px, smaller for boards wider than the window (a full-size F99)
+    readonly property real rowUnits: Math.max(1, ...keyRows.map(r => r.reduce((sum, k) => sum + k[2], 0)))
+    readonly property int unit: Math.max(28, Math.min(48, Math.floor((width - 60) / rowUnits)))
     readonly property int gap: 4
 
-    // [label, physical key id, width in keys]; an empty id is a gap
-    readonly property var keyRows: [
+    // [label, physical key id, width in keys] from the board file; the AULA F75 until it is read
+    readonly property var keyRows: Keyboard.keyRows.length > 0 ? Keyboard.keyRows : fallbackRows
+    readonly property var fallbackRows: [
         [["esc", "esc", 1], ["", "", 0.5], ["F1", "f1", 1], ["F2", "f2", 1], ["F3", "f3", 1], ["F4", "f4", 1], ["", "", 0.5],
          ["F5", "f5", 1], ["F6", "f6", 1], ["F7", "f7", 1], ["F8", "f8", 1], ["", "", 0.5],
          ["F9", "f9", 1], ["F10", "f10", 1], ["F11", "f11", 1], ["F12", "f12", 1], ["", "", 0.5], ["◉", "knob", 1]],
@@ -355,16 +359,18 @@ Item {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         color: Keyboard.connected ? Theme.text : Theme.muted
-                        text: !Keyboard.available ? "frame-keyboard is not in ~/.local/bin (docs/keyboard.md)"
-                            : Keyboard.connected ? `AULA F75 · usb cable${Keyboard.info?.node ? " · " + Keyboard.info.node : ""}`
+                        text: !Keyboard.available ? "frame-keyboard is not in ~/.local/bin (facet add keyboard)"
+                            : Keyboard.connected ? `${Keyboard.boardName} · usb cable${Keyboard.info?.node ? " · " + Keyboard.info.node : ""}`
                             : Keyboard.dongleOnly ? "only the 2.4 GHz dongle is there · plug the cable in"
-                            : "no AULA F75 on the USB cable"
+                            : `no ${Keyboard.boardName} on the USB cable · another board: facet keyboard set`
                     }
 
                     Row {
                         spacing: 6
                         Repeater {
-                            model: [["lighting", "lighting"], ["keys", "fn keys"], ["colors", "colors"]]
+                            // Only what the board can do
+                            model: [["lighting", "lighting", Keyboard.can.effects], ["keys", "fn keys", Keyboard.can.fn],
+                                    ["colors", "colors", Keyboard.can.perkey]].filter(t => t[2])
                             Chip {
                                 required property var modelData
                                 text: modelData[1]
@@ -467,8 +473,8 @@ Item {
                         Steps {
                             Layout.fillWidth: true
                             title: "brightness"
-                            max: 9
-                            value: root.brightness
+                            max: Keyboard.can.brightness ?? 9
+                            value: Math.min(root.brightness, max)
                             onPicked: v => root.brightness = v
                         }
 
@@ -476,8 +482,8 @@ Item {
                             Layout.fillWidth: true
                             visible: root.effectSpec?.speed ?? false
                             title: "speed"
-                            max: 4
-                            value: root.speed
+                            max: Keyboard.can.speed ?? 4
+                            value: Math.min(root.speed, max)
                             onPicked: v => root.speed = v
                         }
 
@@ -569,6 +575,7 @@ Item {
 
                             Repeater {
                                 model: [["fn1", "with fn"], ["fn2", "fn 2"], ["base", "without fn"]]
+                                    .filter(l => (Keyboard.can.layers ?? []).includes(l[0]))
                                 Chip {
                                     required property var modelData
                                     text: modelData[1]
@@ -661,7 +668,7 @@ Item {
                             color: Theme.muted
                             text: Keyboard.layer === "base"
                                 ? "without fn: this changes what the key does normally"
-                                : "lit keys do something together with fn · factory puts the AULA default back"
+                                : "lit keys do something together with fn · factory puts the maker's default back"
                         }
                     }
 
@@ -753,8 +760,8 @@ Item {
                         Steps {
                             Layout.fillWidth: true
                             title: "brightness"
-                            max: 9
-                            value: root.keyBrightness
+                            max: Keyboard.can.brightness ?? 9
+                            value: Math.min(root.keyBrightness, max)
                             onPicked: v => root.keyBrightness = v
                         }
 
