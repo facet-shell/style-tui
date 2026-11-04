@@ -91,7 +91,10 @@ Scope {
     // Everything in view, never larger than 0.6 so the overview always reads as zoomed out
     function fitZoom() {
         const b = bounds();
-        return Math.min(0.6, (window.width - 2 * margin) / Math.max(1, b.w), (window.height - 2 * margin) / Math.max(1, b.h));
+        // The screen's size: show() fits right after visible = true, before the compositor
+        // sized the surface (still its 500x500 placeholder then, which zoomed far too far out)
+        const sw = window.screen?.width ?? window.width, sh = window.screen?.height ?? window.height;
+        return Math.min(0.6, (sw - 2 * margin) / Math.max(1, b.w), (sh - 2 * margin) / Math.max(1, b.h));
     }
 
     function toCanvasX(sx) { return (sx - window.width / 2) / zoom + cx; }
