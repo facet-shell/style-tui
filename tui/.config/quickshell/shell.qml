@@ -19,8 +19,8 @@ import qs.settings
 import qs.voice
 import qs.wallpapers
 
-// The tui look's entry point. Core {} starts what every look shares (services/Core.qml in
-// core); the rest is this look's bar, panels and popups.
+// The tui style's entry point. Core {} starts what every style shares (services/Core.qml in
+// core); the rest is this style's bar, panels and popups.
 ShellRoot {
     Core {}
 

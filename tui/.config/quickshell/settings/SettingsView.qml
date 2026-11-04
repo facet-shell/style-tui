@@ -43,8 +43,8 @@ FocusScope {
     property string status: ""
 
     readonly property var modules: [
-        ["core", "what every look shares: services, bridges, settings, Hyprland, wallpapers"],
-        ["look-tui", "the tui look: bar, launcher, lockscreen, panels, login and boot screens"],
+        ["core", "what every style shares: services, bridges, settings, Hyprland, wallpapers"],
+        ["style-tui", "the tui style: bar, launcher, lockscreen, panels, login and boot screens"],
         ["terminal", "Ghostty, fish, Starship, fastfetch"],
         ["spotify", "Spotify themed, search and controls in the launcher"],
         ["discord", "Vesktop themed, calls and DMs in the shell"],
