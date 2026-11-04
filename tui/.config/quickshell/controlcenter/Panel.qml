@@ -348,11 +348,12 @@ Item {
             }
         }
 
-        // GoXLR faders: levels follow the hardware, mutes work from here. Without a GoXLR
-        // the section only leads to the app mixer, which then mixes the plain devices
+        // GoXLR faders: levels follow the hardware, mutes work from here. The virtual
+        // channels (facet audio channels on) get a slider and a mute each instead. Without
+        // either the section only leads to the app mixer, which then mixes the plain devices
         Section {
             index: 2
-            label: GoXLR.available || Audio.goxlr ? "goxlr faders" : "sound"
+            label: GoXLR.available || Audio.goxlr ? "goxlr faders" : Audio.virtualActive ? "channels" : "sound"
             implicitHeight: faderColumn.implicitHeight + 36
 
             TuiButton {
@@ -372,7 +373,7 @@ Item {
                 spacing: 6
 
                 Label {
-                    visible: !GoXLR.available
+                    visible: !GoXLR.available && !Audio.virtualActive
                     Layout.fillWidth: true
                     text: Audio.goxlr ? "goxlr-utility is not running" : "no goxlr · volume and device per app in the app mixer"
                     color: Theme.muted
@@ -463,6 +464,66 @@ Item {
                         color: Theme.textDim
                     }
                     Item { implicitWidth: 34; implicitHeight: 28 }
+                }
+
+                // Virtual channels: each one's own sink, so the slider is its level; the
+                // last row is the real output they all play into
+                Repeater {
+                    model: Audio.virtualActive && !GoXLR.available
+                        ? Audio.virtualChannels.map(c => ({ key: c.key, label: c.label.toLowerCase(), node: c.node }))
+                            .concat(Audio.masterOutput ? [{ key: "output", label: "output", node: Audio.masterOutput }] : [])
+                        : []
+
+                    RowLayout {
+                        id: channelRow
+
+                        required property var modelData
+                        readonly property real level: modelData.node?.audio?.volume ?? 0
+                        readonly property bool muted: modelData.node?.audio?.muted ?? false
+                        readonly property var glyphs: ({ system: String.fromCodePoint(0xF057E), chat: String.fromCodePoint(0xF086), music: String.fromCodePoint(0xF001), game: String.fromCodePoint(0xF11B), output: String.fromCodePoint(0xF04C3) })
+
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        Icon {
+                            Layout.preferredWidth: 22
+                            text: channelRow.glyphs[channelRow.modelData.key] ?? String.fromCodePoint(0xF057E)
+                            color: Theme.muted
+                            font.pixelSize: 16
+                        }
+                        Label {
+                            Layout.preferredWidth: 104
+                            text: channelRow.modelData.label
+                            color: channelRow.modelData.key === "output" ? Theme.textDim : Theme.muted
+                            elide: Text.ElideRight
+                        }
+                        TuiSlider {
+                            Layout.fillWidth: true
+                            value: Math.min(1, channelRow.level)
+                            dimmed: channelRow.muted
+                            onMoved: value => Audio.setVolume(channelRow.modelData.node, value)
+                        }
+                        Label {
+                            Layout.preferredWidth: 64
+                            horizontalAlignment: Text.AlignRight
+                            text: channelRow.muted ? "muted" : `${Math.round(channelRow.level * 100)}%`
+                            color: channelRow.muted ? Theme.danger : Theme.textDim
+                        }
+                        TuiButton {
+                            implicitWidth: 34
+                            implicitHeight: 28
+                            accent: Theme.danger
+                            active: channelRow.muted
+                            onClicked: Audio.toggleMute(channelRow.modelData.node)
+
+                            Icon {
+                                anchors.centerIn: parent
+                                text: String.fromCodePoint(0xF026)
+                                color: channelRow.muted ? Theme.danger : Theme.muted
+                                font.pixelSize: 16
+                            }
+                        }
+                    }
                 }
             }
         }

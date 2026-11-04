@@ -6,7 +6,8 @@ import qs.config
 import qs.services
 
 // App mixer beside the control center: per-app volume, mute and routing.
-// With a GoXLR every app is routed to one of its channels. Without one (no utility, no
+// With a GoXLR every app is routed to one of its channels, with the virtual channels
+// (facet audio channels on) the same way onto those. Without either (no utility, no
 // device) apps are moved between the machine's own outputs and inputs instead, and master
 // rows for the default output and microphone sit on top, so it is a full mixer either way.
 // From six apps on every app takes one line; apps that play right now come first,
@@ -15,6 +16,8 @@ Item {
     id: root
 
     readonly property bool goxlr: Audio.goxlr
+    // GoXLR or virtual channels: apps get route chips instead of a device list
+    readonly property bool routed: Audio.routed
     // Moving a stream to another channel (or a short pause) drops its link for a moment, so
     // the order only follows idle changes after they held for a while; new and gone apps
     // show up at once
@@ -25,8 +28,8 @@ Item {
     readonly property bool compact: Audio.playback.length > 5
     readonly property int activeCount: playback.filter(n => !Audio.isIdle(n)).length
     readonly property int idleCount: playback.length - activeCount
-    // Without a GoXLR one empty state stands for both lists; with one each list says it
-    readonly property bool empty: !goxlr && playback.length === 0 && recording.length === 0
+    // Without channels one empty state stands for both lists; with them each list says it
+    readonly property bool empty: !routed && playback.length === 0 && recording.length === 0
     // The row whose device list is open: a stream node, or "output" / "input" for the
     // master rows. One at a time, so the panel does not grow with every click
     property var picking: null
@@ -236,8 +239,13 @@ Item {
                 Layout.leftMargin: 60 + 12
                 devices: master.devices
                 current: master.device?.name ?? ""
+                // The output goes through Audio.pickOutput: with the virtual channels that
+                // moves the channels to the device, without them it is the default
                 onPicked: device => {
-                    Audio.setDefault(device);
+                    if (master.key === "output")
+                        Audio.pickOutput(device);
+                    else
+                        Audio.setDefault(device);
                     root.picking = null;
                 }
             }
@@ -256,8 +264,11 @@ Item {
         // skip the delay; they start from the live values and then only the timer sets them
         readonly property bool idleNow: Audio.isIdle(node)
         property bool idle: false
-        // With a GoXLR the channel key ("music"), without one the device's node name
-        readonly property string routeNow: root.goxlr ? Audio.routeOf(node) : Audio.deviceOf(node)?.name ?? ""
+        // Route chips: always with a GoXLR (as before), with the virtual channels where the
+        // list has routes (inputs have none there and keep their device list)
+        readonly property bool chips: root.goxlr || (root.routed && routes.length > 0)
+        // With chips the channel key ("music"), without them the device's node name
+        readonly property string routeNow: chips ? Audio.routeOf(node) : Audio.deviceOf(node)?.name ?? ""
         property string route: ""
         Component.onCompleted: {
             idle = idleNow;
@@ -354,7 +365,7 @@ Item {
                         spacing: 12
 
                         Row {
-                            visible: root.goxlr
+                            visible: row.chips
                             spacing: 6
 
                             Repeater {
@@ -366,7 +377,7 @@ Item {
                                     implicitHeight: root.compact ? 22 : 26
                                     active: row.route === modelData
                                     ink: Theme.muted
-                                    label: modelData
+                                    label: Audio.routeLabel(modelData).toLowerCase()
                                     labelSize: root.compact ? 12 : 13
                                     // Show the new chip at once; PipeWire confirms a moment later
                                     onClicked: {
@@ -380,7 +391,7 @@ Item {
                         // A paused app has no link and so no device: it plays on the
                         // default one (or the one WirePlumber remembered) once it starts
                         DeviceChip {
-                            visible: !root.goxlr
+                            visible: !row.chips
                             name: row.route === "" ? "default" : Audio.deviceLabel(Audio.deviceByName(row.route))
                             maxWidth: root.compact ? 110 : 170
                             open: row.picking
@@ -518,12 +529,13 @@ Item {
         anchors { left: parent.left; right: parent.right; top: parent.top; leftMargin: 20; rightMargin: 20; topMargin: 28 }
         spacing: 22
 
-        // Without a GoXLR nothing else sets the overall level, so it sits on top
+        // Without a GoXLR nothing else sets the overall level, so it sits on top; with the
+        // virtual channels "output" is the device the channels play into
         Frame {
             visible: !root.goxlr
             Layout.fillWidth: true
             implicitHeight: masterColumn.implicitHeight + 28
-            label: "master · default devices"
+            label: root.routed ? "master · output and mic" : "master · default devices"
             labelColor: Theme.muted
             padding: 14
 
@@ -535,8 +547,8 @@ Item {
                 MasterRow {
                     key: "output"
                     title: "output"
-                    device: Audio.defaultSink
-                    devices: Audio.sinks
+                    device: Audio.masterOutput
+                    devices: Audio.masterOutputs
                 }
                 MasterRow {
                     key: "input"
@@ -604,7 +616,7 @@ Item {
             visible: !root.empty
             Layout.fillWidth: true
             implicitHeight: playbackList.implicitHeight + 28
-            label: `playback → ${root.goxlr ? "goxlr channel" : "output"} · ${root.activeCount} active${root.idleCount > 0 ? `, ${root.idleCount} idle` : ""}`
+            label: `playback → ${root.goxlr ? "goxlr channel" : root.routed ? "channel" : "output"} · ${root.activeCount} active${root.idleCount > 0 ? `, ${root.idleCount} idle` : ""}`
             labelColor: Theme.muted
             padding: 14
 
@@ -637,7 +649,9 @@ Item {
 
         Label {
             Layout.fillWidth: true
-            text: !root.goxlr
+            text: Audio.virtualActive
+                ? "the channel picked per app is remembered · rules for new apps in settings › sound"
+                : !root.goxlr
                 ? "the device picked per app is remembered, so it stays there after a restart"
                 : Audio.outputRoutes.length === 0
                 ? "no goxlr outputs found · check goxlrOutputs in config/Config.qml"

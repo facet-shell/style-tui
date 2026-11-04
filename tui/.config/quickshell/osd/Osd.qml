@@ -124,6 +124,40 @@ Scope {
         }
     }
 
+    // ── Virtual channels (facet audio channels on) ───────────
+
+    // A channel's level or mute changed (the control center, pavucontrol, an app), like a
+    // GoXLR fader; System is the default output and shows below as the volume. The real
+    // output the channels play into shows as "output".
+    function checkChannel(node) {
+        const audio = node?.audio;
+        if (!audio)
+            return;
+        const key = Audio.virtualChannels.find(c => c.node === node)?.key ?? "";
+        const name = key === "" ? "output" : Audio.routeLabel(key).toLowerCase();
+        show(`channel · ${name}`, glyph(audio.muted ? 0xF0581 : (faderIcons[key] ?? 0xF057E)),
+            Math.min(1, audio.volume), audio.muted ? "muted" : `${Math.round(audio.volume * 100)}%`, audio.muted);
+    }
+
+    Variants {
+        model: Audio.virtualActive
+            ? Audio.virtualNodes.concat(Audio.masterOutput ? [Audio.masterOutput] : []).filter(n => n !== root.sink)
+            : []
+
+        Connections {
+            required property var modelData
+            target: modelData?.audio ?? null
+
+            function onVolumesChanged() {
+                root.checkChannel(modelData);
+            }
+
+            function onMutedChanged() {
+                root.checkChannel(modelData);
+            }
+        }
+    }
+
     // ── Default output in PipeWire ───────────────────────────
 
     readonly property PwNode sink: Pipewire.defaultAudioSink

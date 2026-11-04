@@ -26,13 +26,14 @@ FocusScope {
         ["notifications", "notifications", "what shows when, look, Spotify, voice"],
         ["launcher", "launcher", "search, Claude, files, timers"],
         ["games", "games", "game mode, which apps are games"],
-        ["sound", "sound", "output and input"],
+        ["sound", "sound", "output, input, channels"],
         ["apps", "apps", "modules and their apps"],
         ["system", "system", "updates, boot, login, about"]
     ]
 
     readonly property string home: Quickshell.env("HOME")
-    readonly property string frameBin: `${home}/.local/bin/frame`
+    // The facet command (it was called frame before, and that link is gone since)
+    readonly property string frameBin: `${home}/.local/bin/facet`
     readonly property string stateDir: `${Quickshell.env("XDG_STATE_HOME") || home + "/.local/state"}/frameshell`
     readonly property string modulesDir: `${Quickshell.env("XDG_DATA_HOME") || home + "/.local/share"}/frameshell/modules`
 
@@ -589,6 +590,205 @@ FocusScope {
                     required property var modelData
                     text: `+ ${modelData[1]}`
                     onClicked: games.add(modelData[0])
+                }
+            }
+        }
+    }
+
+    // The app rules for the virtual channels (Config.audioRules): which app lands on which
+    // channel when it starts playing. A row per rule (the channel buttons change it, ✕ takes
+    // it off), a field to add one and the apps playing right now as suggestions.
+    component AudioRulesSetting: ColumnLayout {
+        id: rules
+
+        readonly property var list: Config.audioRules
+        readonly property var channels: Audio.outputRoutes
+        property string newChannel: channels.includes("game") ? "game" : channels[0] ?? ""
+
+        function store(next) {
+            if (JSON.stringify(next) === JSON.stringify(Config.audioRuleDefaults))
+                Config.reset("audioRules");
+            else
+                Config.set("audioRules", next);
+        }
+
+        function has(pattern) {
+            return list.some(r => String(r[0]).toLowerCase() === String(pattern).toLowerCase());
+        }
+
+        function add(pattern, channel) {
+            const p = String(pattern).trim();
+            if (p === "" || channel === "" || has(p))
+                return;
+            store(list.concat([[p, channel]]));
+        }
+
+        function change(index, channel) {
+            store(list.map((r, i) => i === index ? [r[0], channel] : r));
+        }
+
+        function remove(index) {
+            store(list.filter((r, i) => i !== index));
+        }
+
+        // The apps playing now that no rule names yet: their program, else their name
+        readonly property var playing: {
+            const seen = new Set();
+            const out = [];
+            for (const n of Audio.playback) {
+                const props = n.properties ?? {};
+                const id = String(props["application.process.binary"] || props["application.name"] || "");
+                if (id === "" || seen.has(id.toLowerCase()) || has(id))
+                    continue;
+                seen.add(id.toLowerCase());
+                out.push(id);
+            }
+            return out;
+        }
+
+        Layout.fillWidth: true
+        spacing: 8
+
+        Text {
+            Layout.fillWidth: true
+            text: "apps on their channel"
+            color: Theme.text
+            font.family: Theme.font
+            font.pixelSize: 14
+        }
+        Text {
+            Layout.fillWidth: true
+            text: "when an app starts playing on system it moves to its channel; the app's name or program, any case, * matches anything, @game is the game that runs. What you pick in the mixer wins."
+            color: Theme.muted
+            font.family: Theme.font
+            font.pixelSize: 12
+            wrapMode: Text.Wrap
+        }
+
+        Repeater {
+            model: rules.list
+            delegate: RowLayout {
+                id: ruleRow
+
+                required property var modelData
+                required property int index
+
+                Layout.fillWidth: true
+                spacing: 6
+
+                Text {
+                    Layout.preferredWidth: 220
+                    text: String(ruleRow.modelData[0])
+                    color: rules.channels.includes(String(ruleRow.modelData[1])) ? Theme.text : Theme.muted
+                    font.family: Theme.font
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                }
+                Repeater {
+                    model: rules.channels
+                    delegate: Action {
+                        required property string modelData
+                        implicitHeight: 26
+                        text: Audio.routeLabel(modelData).toLowerCase()
+                        active: String(ruleRow.modelData[1]) === modelData
+                        onClicked: rules.change(ruleRow.index, modelData)
+                    }
+                }
+                Text {
+                    visible: !rules.channels.includes(String(ruleRow.modelData[1]))
+                    text: `${ruleRow.modelData[1]} · not set up`
+                    color: Theme.muted
+                    font.family: Theme.font
+                    font.pixelSize: 12
+                }
+                Item {
+                    Layout.fillWidth: true
+                }
+                Action {
+                    text: "✕"
+                    implicitWidth: 30
+                    implicitHeight: 26
+                    tint: Theme.danger
+                    onClicked: rules.remove(ruleRow.index)
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            Rectangle {
+                Layout.preferredWidth: 220
+                Layout.preferredHeight: 30
+                color: "transparent"
+                border.width: 1
+                border.color: ruleEntry.activeFocus ? Theme.primary : Theme.border
+
+                TextInput {
+                    id: ruleEntry
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    verticalAlignment: TextInput.AlignVCenter
+                    color: Theme.text
+                    font.family: Theme.font
+                    font.pixelSize: 14
+                    clip: true
+                    selectByMouse: true
+                    onAccepted: {
+                        rules.add(text, rules.newChannel);
+                        text = "";
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: ruleEntry.text === "" && !ruleEntry.activeFocus
+                        text: "app, *pattern* or @game"
+                        color: Theme.muted
+                        font: ruleEntry.font
+                    }
+                }
+            }
+            Repeater {
+                model: rules.channels
+                delegate: Action {
+                    required property string modelData
+                    implicitHeight: 26
+                    text: Audio.routeLabel(modelData).toLowerCase()
+                    active: rules.newChannel === modelData
+                    onClicked: rules.newChannel = modelData
+                }
+            }
+            Action {
+                text: "add"
+                available: ruleEntry.text.trim() !== "" && rules.newChannel !== ""
+                onClicked: {
+                    rules.add(ruleEntry.text, rules.newChannel);
+                    ruleEntry.text = "";
+                }
+            }
+        }
+
+        // What plays now: a click fills the field
+        Flow {
+            Layout.fillWidth: true
+            visible: rules.playing.length > 0
+            spacing: 6
+
+            Text {
+                text: "playing now"
+                color: Theme.muted
+                font.family: Theme.font
+                font.pixelSize: 12
+            }
+            Repeater {
+                model: rules.playing
+                delegate: Action {
+                    required property string modelData
+                    implicitHeight: 26
+                    text: `+ ${modelData}`
+                    onClicked: ruleEntry.text = modelData
                 }
             }
         }
@@ -1160,10 +1360,20 @@ FocusScope {
                             hint: "one line: spotify, the song and the artist"
                         }
                         GameListSetting {}
+                        // Only with a GoXLR to load it on
                         TextSetting {
+                            visible: GoXLR.available || Audio.goxlr || Config.isSet("goxlrGameProfile")
                             key: "goxlrGameProfile"
                             title: "GoXLR profile while playing"
                             hint: "the one before comes back after; empty: none"
+                        }
+                        Label {
+                            visible: Audio.virtualActive && Audio.outputRoutes.includes("game")
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            color: Theme.muted
+                            font.pixelSize: 12
+                            text: "the game's sound goes on the game channel (the @game rule under sound)"
                         }
                     }
 
@@ -1173,18 +1383,20 @@ FocusScope {
                         Layout.fillWidth: true
                         spacing: 12
 
-                        Heading { text: "output · where the sound goes" }
+                        // With the virtual channels the default output is their System
+                        // channel; picking here moves the channels onto the device instead
+                        Heading { text: Audio.virtualActive ? "output · where the channels play" : "output · where the sound goes" }
 
                         Repeater {
-                            model: Audio.sinks
+                            model: Audio.masterOutputs
                             delegate: TuiButton {
                                 id: sinkButton
 
                                 required property var modelData
                                 Layout.fillWidth: true
                                 implicitHeight: 34
-                                active: Pipewire.defaultAudioSink?.id === modelData.id
-                                onClicked: Pipewire.preferredDefaultAudioSink = modelData
+                                active: Audio.masterOutput?.id === modelData.id
+                                onClicked: Audio.pickOutput(modelData)
 
                                 Label {
                                     anchors.left: parent.left
@@ -1221,13 +1433,65 @@ FocusScope {
                             }
                         }
 
+                        // ── channels: GoXLR, the virtual ones, or a hint how to get them ──
+                        Heading { text: "channels" }
+
+                        ChoiceSetting {
+                            visible: Audio.goxlrAvailable || Audio.virtualAvailable
+                            key: "audioChannels"
+                            title: "channels from"
+                            hint: `in use: ${Audio.channelSource === "goxlr" ? "the GoXLR" : Audio.channelSource === "virtual" ? "the virtual channels" : "none, plain devices"}`
+                            options: [["auto", "auto"]]
+                                .concat(Audio.goxlrAvailable ? [["goxlr", "goxlr"]] : [])
+                                .concat(Audio.virtualAvailable ? [["virtual", "virtual"]] : [])
+                                .concat([["none", "none"]])
+                        }
+                        Label {
+                            visible: !Audio.goxlrAvailable && Audio.virtualSetup === null
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            color: Theme.muted
+                            font.pixelSize: 12
+                            text: "no GoXLR here. `facet audio channels on` in a terminal makes virtual System, Game, Chat and Music outputs: apps on their own channel, a fader each in the control center, a track each in recordings."
+                        }
+                        Label {
+                            visible: Audio.virtualSetup !== null
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            color: Audio.virtualAvailable ? Theme.textDim : Theme.warn
+                            font.pixelSize: 12
+                            text: Audio.virtualAvailable
+                                ? `virtual: ${Audio.virtualChannels.map(c => `${c.label.toLowerCase()} (${c.node.name})`).join(", ")} → ${Audio.deviceLabel(Audio.channelOutput)}. Other channels: facet audio channels on <names>; gone again: facet audio channels off`
+                                : "the virtual channels are set up but not in PipeWire right now · facet audio channels status"
+                        }
+
+                        BoolSetting {
+                            visible: Audio.virtualActive
+                            key: "audioRulesOn"
+                            title: "apps to their channel by themselves"
+                            hint: "the rules below, for apps that start on system"
+                        }
+                        AudioRulesSetting {
+                            visible: Audio.virtualActive && Config.audioRulesOn
+                        }
+                        Setting {
+                            visible: Audio.virtualActive && Object.keys(Channels.choices).length > 0
+                            title: "picked in the mixer"
+                            hint: Object.keys(Channels.choices).map(k => `${k} → ${Channels.choices[k]}`).join(", ")
+
+                            Action {
+                                text: "forget"
+                                onClicked: Channels.forgetChoices()
+                            }
+                        }
+
                         Label {
                             Layout.fillWidth: true
                             Layout.topMargin: 6
                             wrapMode: Text.Wrap
                             color: Theme.muted
                             font.pixelSize: 12
-                            text: "Levels per app and the GoXLR's channels are in the control center's mixer."
+                            text: Audio.goxlr ? "Levels per app and the GoXLR's channels are in the control center's mixer." : Audio.virtualActive ? "Levels per app and per channel are in the control center and its mixer." : "Levels per app are in the control center's mixer."
                         }
                     }
 
@@ -1289,7 +1553,9 @@ FocusScope {
                             title: "keyboard live"
                             hint: "off: the keyboard app only shows what it would send"
                         }
+                        // Only where a GoXLR answers
                         Setting {
+                            visible: GoXLR.available
                             title: "GoXLR lights"
                             hint: "faders, buttons and the animation in the theme's colors"
 
