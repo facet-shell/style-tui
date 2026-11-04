@@ -19,9 +19,21 @@ Item {
 
     readonly property bool isCall: entry.kind === "call"
     readonly property bool mini: entry.kind === "mini"
-    // Minimal has no buttons, so whatever waits for an answer (a call, an invite) is a line
-    readonly property string look: Config.notificationStyle === "minimal" && entry.timeout === 0 && entry.actions.length > 0
-        ? "line" : Config.notificationStyle
+    // Minimal and the in-game line have no buttons, so whatever waits for an answer (a call,
+    // an invite) is a line
+    readonly property bool waits: entry.timeout === 0 && entry.actions.length > 0
+    readonly property bool inGame: Toggles.gameMode && Config.notificationCompactInGame
+    readonly property string look: inGame ? (waits ? "line" : "game")
+        : Config.notificationStyle === "minimal" && waits ? "line"
+        : Config.notificationStyle
+    // In the game line the app's name has its own color, as on the website
+    readonly property color appTone: {
+        const app = String(entry.app).toLowerCase();
+        return entry.critical ? Theme.danger
+            : app.includes("discord") || app.includes("vesktop") ? Theme.accent
+            : app.includes("spotify") || app.includes("steam") ? Theme.secondary
+            : Theme.primary;
+    }
     readonly property bool showIcon: side !== "center"
     // Where the content lines up: left on both sides, centered in the middle
     readonly property string align: side === "center" ? "center" : "left"
@@ -43,9 +55,12 @@ Item {
     property bool leaving: false
     property real appear: 0
 
-    implicitWidth: look === "minimal" ? Math.min(Config.notificationWidth, minimalRow.implicitWidth + 28) : Config.notificationWidth
+    implicitWidth: look === "minimal" ? Math.min(Config.notificationWidth, minimalRow.implicitWidth + 28)
+        : look === "game" ? Math.min(Config.notificationWidth, gameRow.implicitWidth + 24)
+        : Config.notificationWidth
     implicitHeight: look === "card" ? cardContent.implicitHeight + (mini ? 32 : 40)
         : look === "line" ? 48
+        : look === "game" ? 30
         : 34
     opacity: leaving ? 0 : appear
     // In from the side it sits on; in the middle it drops in
@@ -109,21 +124,12 @@ Item {
             : modelData.style === "no" ? Theme.danger
             : Theme.secondary
 
-        implicitWidth: actionLabel.implicitWidth + 24
         implicitHeight: 26
         accent: tone
+        ink: tone
+        label: modelData.label
         border.color: modelData.style !== "" ? tone : hovered ? Theme.primary : Theme.border
         onClicked: Notifications.invoke(uid, modelData.id)
-
-        // The label's parent is the button's inner item, so go by id
-        Text {
-            id: actionLabel
-            anchors.centerIn: parent
-            text: action.modelData.label
-            color: action.tone
-            font.family: Theme.font
-            font.pixelSize: 13
-        }
     }
 
     component CloseButton: TuiButton {
@@ -146,7 +152,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: Theme.bg
-        opacity: root.look === "minimal" ? 0.9 : 0.96
+        opacity: root.look === "game" ? 0.7 : root.look === "minimal" ? 0.9 : 0.96
     }
 
     // ── card ─────────────────────────────────────────────────
@@ -333,16 +339,49 @@ Item {
         color: root.entry.critical ? Theme.danger : Theme.primary
     }
 
-    // A click on a minimal one puts it away
+    // ── game: one see-through line, "discord lena: gg, one more?" ──
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.look === "game"
+        color: "transparent"
+        border.width: 1
+        border.color: Theme.border
+    }
+
+    Row {
+        id: gameRow
+
+        visible: root.look === "game"
+        anchors.centerIn: parent
+        spacing: 8
+
+        Text {
+            text: root.entry.app
+            color: root.appTone
+            font.family: Theme.font
+            font.pixelSize: 14
+        }
+        Text {
+            width: Math.min(implicitWidth, Config.notificationWidth - 90)
+            text: root.entry.body !== "" ? `${root.entry.title}: ${root.entry.body}` : root.entry.title
+            color: Theme.textDim
+            font.family: Theme.font
+            font.pixelSize: 14
+            elide: Text.ElideRight
+        }
+    }
+
+    // A click on a minimal one or the game line puts it away
     MouseArea {
         anchors.fill: parent
-        visible: root.look === "minimal"
+        visible: root.look === "minimal" || root.look === "game"
         onClicked: root.close(false)
     }
 
     // Time left, shrinking toward the side it sits on
     Rectangle {
-        visible: root.entry.timeout > 0 && root.look !== "minimal"
+        visible: root.entry.timeout > 0 && root.look !== "minimal" && root.look !== "game"
         y: parent.height - height
         width: parent.width * root.remaining
         x: root.align === "right" ? parent.width - width : root.align === "center" ? (parent.width - width) / 2 : 0

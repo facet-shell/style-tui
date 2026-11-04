@@ -54,7 +54,9 @@ Scope {
 
             y: root.top ? 14 : 2
             width: Config.notificationWidth
-            spacing: Config.notificationStyle === "card" ? 20 : 10
+            // The game lines sit close, like the website shows them
+            spacing: Toggles.gameMode && Config.notificationCompactInGame ? 8
+                : Config.notificationStyle === "card" ? 20 : 10
 
             // ScriptModel keeps existing cards (and their timers) when the list changes
             Repeater {

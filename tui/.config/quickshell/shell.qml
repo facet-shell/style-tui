@@ -6,6 +6,7 @@ import qs.controlcenter
 import qs.draw
 import qs.editor
 import qs.gallery
+import qs.game
 import qs.hotkeys
 import qs.keyboard
 import qs.launcher
@@ -91,6 +92,11 @@ ShellRoot {
 
     // Discord voice: who is in your channel and who talks, on the left (Super+Shift+V moves it)
     VoiceOverlay {
+        hidden: lock.active
+    }
+
+    // fps, cpu and gpu over the game while game mode is on (settings, game mode)
+    FpsOverlay {
         hidden: lock.active
     }
 

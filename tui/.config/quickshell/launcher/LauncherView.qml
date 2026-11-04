@@ -434,19 +434,13 @@ Item {
                         }
 
                         TuiButton {
-                            implicitWidth: copyLabel.implicitWidth + 24
-                            implicitHeight: copyLabel.implicitHeight + 10
+                            implicitHeight: 30
                             accent: Theme.accent
                             active: root.copied !== ""
+                            ink: Theme.secondary
+                            label: "⧉ copy answer"
+                            labelSize: Theme.size.small
                             onClicked: root.copyAnswer(true)
-
-                            Label {
-                                id: copyLabel
-                                anchors.centerIn: parent
-                                text: "⧉ copy answer"
-                                color: parent.hovered ? Theme.text : Theme.secondary
-                                font.pixelSize: Theme.size.small
-                            }
                         }
                     }
 
@@ -597,18 +591,12 @@ Item {
                                                 }
 
                                                 TuiButton {
-                                                    implicitWidth: codeCopy.implicitWidth + 16
-                                                    implicitHeight: codeCopy.implicitHeight + 6
+                                                    implicitHeight: 22
                                                     accent: Theme.accent
+                                                    ink: Theme.secondary
+                                                    label: "⧉ copy"
+                                                    labelSize: 12
                                                     onClicked: root.copyCode(block.modelData.text)
-
-                                                    Label {
-                                                        id: codeCopy
-                                                        anchors.centerIn: parent
-                                                        text: "⧉ copy"
-                                                        color: parent.hovered ? Theme.text : Theme.secondary
-                                                        font.pixelSize: 12
-                                                    }
                                                 }
                                             }
                                         }

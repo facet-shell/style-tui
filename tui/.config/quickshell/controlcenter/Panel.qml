@@ -261,48 +261,33 @@ Item {
                 spacing: 8
 
                 TuiButton {
-                    implicitWidth: settingsLabel.implicitWidth + 20
                     implicitHeight: 24
-                    color: Theme.bg
+                    base: Theme.bg
+                    ink: Theme.secondary
+                    label: "settings ›"
+                    hint: "Super+,"
+                    labelSize: 14
                     onClicked: root.settingsRequested()
-
-                    Label {
-                        id: settingsLabel
-                        anchors.centerIn: parent
-                        text: "settings ›"
-                        color: Theme.secondary
-                        font.pixelSize: 14
-                    }
                 }
 
                 TuiButton {
-                    implicitWidth: keyboardLabel.implicitWidth + 20
                     implicitHeight: 24
-                    color: Theme.bg
+                    base: Theme.bg
+                    ink: Theme.secondary
+                    label: "keyboard ›"
+                    hint: "Super+K"
+                    labelSize: 14
                     onClicked: root.keyboardRequested()
-
-                    Label {
-                        id: keyboardLabel
-                        anchors.centerIn: parent
-                        text: "keyboard ›"
-                        color: Theme.secondary
-                        font.pixelSize: 14
-                    }
                 }
 
                 TuiButton {
-                    implicitWidth: wallpaperLabel.implicitWidth + 20
                     implicitHeight: 24
-                    color: Theme.bg
+                    base: Theme.bg
+                    ink: Theme.secondary
+                    label: "wallpapers ›"
+                    hint: "Super+W"
+                    labelSize: 14
                     onClicked: root.wallpapersRequested()
-
-                    Label {
-                        id: wallpaperLabel
-                        anchors.centerIn: parent
-                        text: "wallpapers ›"
-                        color: Theme.secondary
-                        font.pixelSize: 14
-                    }
                 }
             }
 
@@ -372,19 +357,13 @@ Item {
 
             TuiButton {
                 anchors { right: parent.right; top: parent.top; topMargin: -16 - height / 2 }
-                implicitWidth: mixerLabel.implicitWidth + 20
                 implicitHeight: 24
-                color: active ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.14) : Theme.bg
+                base: Theme.bg
+                ink: Theme.secondary
+                label: "app mixer ›"
+                labelSize: 14
                 active: root.mixerOpen
                 onClicked: root.mixerToggled()
-
-                Label {
-                    id: mixerLabel
-                    anchors.centerIn: parent
-                    text: "app mixer ›"
-                    color: Theme.secondary
-                    font.pixelSize: 14
-                }
             }
 
             ColumnLayout {
@@ -497,19 +476,13 @@ Item {
             // The task manager opens beside the panel, like the app mixer
             TuiButton {
                 anchors { right: parent.right; top: parent.top; topMargin: -16 - height / 2 }
-                implicitWidth: tasksLabel.implicitWidth + 20
                 implicitHeight: 24
-                color: active ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.14) : Theme.bg
+                base: Theme.bg
+                ink: Theme.secondary
+                label: "tasks ›"
+                labelSize: 14
                 active: root.tasksOpen
                 onClicked: root.tasksToggled()
-
-                Label {
-                    id: tasksLabel
-                    anchors.centerIn: parent
-                    text: "tasks ›"
-                    color: Theme.secondary
-                    font.pixelSize: 14
-                }
             }
 
             StatsSection {

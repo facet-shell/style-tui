@@ -184,18 +184,11 @@ Item {
 
         property string text: ""
 
-        implicitWidth: actText.implicitWidth + 28
         implicitHeight: 30
         accent: Theme.secondary
-
-        Text {
-            id: actText
-            anchors.centerIn: parent
-            text: act.text
-            color: act.available ? Theme.secondary : Theme.muted
-            font.family: Theme.font
-            font.pixelSize: 14
-        }
+        ink: Theme.secondary
+        label: text
+        labelSize: 14
     }
 
     // Slider over whole steps 0..max with the value next to it

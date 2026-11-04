@@ -159,18 +159,10 @@ FocusScope {
         property string text: ""
         property color tint: Theme.secondary
 
-        implicitWidth: actText.implicitWidth + 24
         implicitHeight: 30
         accent: tint
-
-        Text {
-            id: actText
-            anchors.centerIn: parent
-            text: act.text
-            color: !act.available ? Theme.muted : act.active ? Theme.text : act.tint
-            font.family: Theme.font
-            font.pixelSize: 13
-        }
+        ink: tint
+        label: text
     }
 
     // One setting: its name and what it does on the left, the control on the right, and
@@ -1145,6 +1137,27 @@ FocusScope {
                             key: "barOverFullscreen"
                             title: "bar at the top edge over fullscreen"
                             hint: "rest the mouse on the top edge in a game's menu, the bar comes down over it"
+                        }
+                        BoolSetting {
+                            key: "fpsOverlay"
+                            title: "fps overlay"
+                            hint: "[game]─[fps]─[cpu]─[gpu] over the game; fps needs MangoHud in the game (Steam launch options: mangohud %command%)"
+                        }
+                        ChoiceSetting {
+                            visible: Config.fpsOverlay
+                            key: "fpsOverlayPosition"
+                            title: "where it sits"
+                            options: [["top-left", "↖"], ["top-right", "↗"], ["bottom-left", "↙"], ["bottom-right", "↘"]]
+                        }
+                        BoolSetting {
+                            key: "notificationCompactInGame"
+                            title: "small notifications while playing"
+                            hint: "one see-through line: the app and what it says; calls and invites keep their buttons"
+                        }
+                        BoolSetting {
+                            key: "spotifyCompactInGame"
+                            title: "small Spotify popup while playing"
+                            hint: "one line: spotify, the song and the artist"
                         }
                         GameListSetting {}
                         TextSetting {

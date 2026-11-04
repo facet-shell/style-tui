@@ -99,18 +99,11 @@ Scope {
 
                 TuiButton {
                     anchors { right: parent.right; top: parent.top; rightMargin: 14; topMargin: -height / 2 }
-                    implicitWidth: clearLabel.implicitWidth + 20
                     implicitHeight: 22
-                    color: Theme.bg
+                    base: Theme.bg
+                    ink: Theme.secondary
+                    label: "clear all"
                     onClicked: Notifications.clearHistory()
-
-                    Label {
-                        id: clearLabel
-                        anchors.centerIn: parent
-                        text: "clear all"
-                        color: Theme.secondary
-                        font.pixelSize: 13
-                    }
                 }
 
                 ColumnLayout {

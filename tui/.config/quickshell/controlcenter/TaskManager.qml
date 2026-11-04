@@ -109,33 +109,19 @@ Item {
             }
 
             TuiButton {
-                implicitWidth: closeLabel.implicitWidth + 18
                 implicitHeight: 26
+                ink: Theme.muted
+                label: "close"
                 onClicked: Tasks.close(row.app)
-
-                Label {
-                    id: closeLabel
-                    anchors.centerIn: parent
-                    text: "close"
-                    color: parent.hovered ? Theme.text : Theme.muted
-                    font.pixelSize: 13
-                }
             }
 
             TuiButton {
-                implicitWidth: killLabel.implicitWidth + 18
                 implicitHeight: 26
                 accent: Theme.danger
                 active: row.isArmed
+                ink: Theme.muted
+                label: row.isArmed ? "sure?" : "kill"
                 onClicked: root.kill(row.app)
-
-                Label {
-                    id: killLabel
-                    anchors.centerIn: parent
-                    text: row.isArmed ? "sure?" : "kill"
-                    color: row.isArmed || parent.hovered ? Theme.danger : Theme.muted
-                    font.pixelSize: 13
-                }
             }
         }
 

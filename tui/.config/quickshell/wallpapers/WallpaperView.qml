@@ -102,17 +102,9 @@ Item {
 
         property string text: ""
 
-        implicitWidth: chipLabel.implicitWidth + 20
         implicitHeight: 26
-
-        Text {
-            id: chipLabel
-            anchors.centerIn: parent
-            text: chip.text
-            color: chip.active ? Theme.text : chip.hovered ? Theme.textDim : Theme.muted
-            font.family: Theme.font
-            font.pixelSize: 13
-        }
+        ink: Theme.muted
+        label: text
     }
 
     component Section: Frame {

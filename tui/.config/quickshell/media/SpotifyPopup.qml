@@ -26,7 +26,10 @@ Scope {
     readonly property string side: Config.side(Config.spotifyPosition)
     readonly property bool top: Config.atTop(Config.spotifyPosition)
     readonly property bool mirrored: side === "right"
-    readonly property string format: ["wide", "tall", "strip"].includes(Config.spotifyFormat) ? Config.spotifyFormat : "wide"
+    // While playing it shrinks to one see-through line (Config.spotifyCompactInGame)
+    readonly property bool inGame: Toggles.gameMode && Config.spotifyCompactInGame
+    readonly property string format: inGame ? "game"
+        : ["wide", "tall", "strip"].includes(Config.spotifyFormat) ? Config.spotifyFormat : "wide"
     readonly property real size: Math.max(0.6, Math.min(1.6, Config.spotifySize))
     readonly property bool showCover: side !== "center"
     readonly property int textAlign: side === "right" ? Text.AlignRight : side === "center" ? Text.AlignHCenter : Text.AlignLeft
@@ -148,8 +151,8 @@ Scope {
             id: card
 
             y: 12
-            width: root.format === "tall" ? 260 : root.format === "strip" ? 380 : 420
-            height: root.format === "strip" ? strip.implicitHeight + 16 : layout.implicitHeight + 36
+            width: root.format === "game" ? gameRow.implicitWidth + 24 : root.format === "tall" ? 260 : root.format === "strip" ? 380 : 420
+            height: root.format === "game" ? 30 : root.format === "strip" ? strip.implicitHeight + 16 : layout.implicitHeight + 36
             scale: root.size
             transformOrigin: Item.TopLeft
             opacity: root.shown
@@ -165,11 +168,12 @@ Scope {
             Rectangle {
                 anchors.fill: parent
                 color: Theme.bg
-                opacity: 0.96
+                opacity: root.format === "game" ? 0.7 : 0.96
             }
 
             Frame {
                 anchors.fill: parent
+                visible: root.format !== "game"
                 label: root.format === "strip" ? "" : "now playing · spotify"
                 labelAlign: root.side
                 borderColor: root.format === "strip" ? Theme.border : Theme.primary
@@ -180,7 +184,7 @@ Scope {
             GridLayout {
                 id: layout
 
-                visible: root.format !== "strip"
+                visible: root.format === "wide" || root.format === "tall"
                 anchors { left: parent.left; right: parent.right; top: parent.top; leftMargin: 16; rightMargin: 16; topMargin: 24 }
                 // wide: cover beside the song; tall: cover on top
                 columns: root.format === "tall" || !root.showCover ? 1 : 2
@@ -324,8 +328,35 @@ Scope {
                 }
             }
 
+            // ── game: "spotify Midnight City · M83", nothing else ──
+            Rectangle {
+                anchors.fill: parent
+                visible: root.format === "game"
+                color: "transparent"
+                border.width: 1
+                border.color: Theme.border
+            }
+
+            Row {
+                id: gameRow
+
+                visible: root.format === "game"
+                anchors.centerIn: parent
+                spacing: 8
+
+                Label {
+                    text: "spotify"
+                    color: Theme.secondary
+                }
+                Label {
+                    width: Math.min(implicitWidth, 360)
+                    text: `${root.spotify?.trackTitle ?? ""}  ·  ${root.spotify?.trackArtist ?? ""}`
+                }
+            }
+
             // Time until the popup hides, shrinking toward the side it sits on
             Rectangle {
+                visible: root.format !== "game"
                 y: parent.height - height
                 width: parent.width * root.remaining
                 x: root.side === "right" ? parent.width - width : root.side === "center" ? (parent.width - width) / 2 : 0

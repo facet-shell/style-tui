@@ -363,21 +363,15 @@ Item {
                                 TuiButton {
                                     required property string modelData
 
-                                    implicitWidth: chipLabel.implicitWidth + (root.compact ? 14 : 18)
                                     implicitHeight: root.compact ? 22 : 26
                                     active: row.route === modelData
+                                    ink: Theme.muted
+                                    label: modelData
+                                    labelSize: root.compact ? 12 : 13
                                     // Show the new chip at once; PipeWire confirms a moment later
                                     onClicked: {
                                         row.route = modelData;
                                         Audio.move(row.node, modelData);
-                                    }
-
-                                    Label {
-                                        id: chipLabel
-                                        anchors.centerIn: parent
-                                        text: parent.parent.modelData
-                                        color: parent.parent.active ? Theme.text : Theme.muted
-                                        font.pixelSize: root.compact ? 12 : 13
                                     }
                                 }
                             }

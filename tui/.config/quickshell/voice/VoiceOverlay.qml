@@ -147,8 +147,9 @@ Scope {
             return Quickshell.screens.find(s => s.name === name) ?? Quickshell.screens[0];
         }
         readonly property string screenName: screen?.name ?? ""
-        // Without a saved spot: on the left, under the bar
-        readonly property var pos: Config.voiceOverlayPos[screenName] ?? [24, 70]
+        // Without a saved spot: on the left, under the bar (and under the fps line there)
+        readonly property var pos: Config.voiceOverlayPos[screenName]
+            ?? [24, Config.fpsOverlay && Config.fpsOverlayPosition === "top-left" && Toggles.gameMode ? 108 : 70]
 
         visible: !root.hidden && (DiscordBridge.overlayShown || root.moving)
         color: "transparent"

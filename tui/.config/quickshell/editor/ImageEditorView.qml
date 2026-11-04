@@ -126,18 +126,10 @@ FocusScope {
         property string text: ""
         property color tint: Theme.secondary
 
-        implicitWidth: actText.implicitWidth + 24
         implicitHeight: 28
         accent: tint
-
-        Text {
-            id: actText
-            anchors.centerIn: parent
-            text: act.text
-            color: !act.available ? Theme.muted : act.active ? Theme.text : act.tint
-            font.family: Theme.font
-            font.pixelSize: 13
-        }
+        ink: tint
+        label: text
     }
 
     // The drawing at the picture's full size for the export (ImageProject.drawingNeeded). A
