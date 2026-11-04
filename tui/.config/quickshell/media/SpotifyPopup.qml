@@ -53,8 +53,8 @@ Scope {
         if (!spotify || spotify.trackTitle === "" || key === lastTrack)
             return;
         lastTrack = key;
-        // Skipped from the card under the bar: you are already looking at it
-        if (Spotify.cardOpen)
+        // Skipped from the card under the bar or in Spotify itself: you are already looking at it
+        if (Spotify.cardOpen || Spotify.windowFocused)
             return;
         // Game mode and the bell, as the rules say
         if (!Notifications.allows("sp.song"))
@@ -65,6 +65,12 @@ Scope {
 
     // No popup for the song that was already playing when the shell started
     onSpotifyChanged: lastTrack = trackKey(spotify)
+    // Switching to Spotify while it is out: Spotify shows the song itself
+    readonly property bool inSpotify: Spotify.windowFocused
+    onInSpotifyChanged: if (inSpotify) {
+        hideAnimation.stop();
+        open = false;
+    }
 
     Connections {
         target: root.spotify
