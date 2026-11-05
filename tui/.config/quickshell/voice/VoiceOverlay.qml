@@ -7,8 +7,9 @@ import qs.config
 import qs.services
 
 // Discord voice overlay: while you are in a voice channel, who is in it, who is talking
-// (a green ring), who is muted, deafened or live, and a short feed of joins, leaves and your
-// own mute. No title, frame or background, only faces and names with a thin dark outline,
+// (a green ring), who is muted, deafened or live, who watches your own stream (an eye with
+// the count next to you, their faces in the list look), and a short feed of joins, leaves and
+// your own mute. No title, frame or background, only faces and names with a thin dark outline,
 // so it reads over any game. Every click goes through it. Super+Shift+V moves it: then it
 // takes the mouse, drag it anywhere, Esc or the key again keeps the spot (per screen).
 // When it shows, the look and the feed are in the settings (Config.voiceOverlay*); the data
@@ -25,6 +26,10 @@ Scope {
     }
     readonly property bool compact: Config.voiceOverlayLook === "compact"
     readonly property real size: Math.max(0.6, Math.min(1.6, Config.voiceOverlaySize))
+
+    // Who watches your stream, shaped like a member so Face can draw them
+    readonly property var viewers: DiscordBridge.streamViewers.map(v => ({ userId: v.id, name: v.name, avatar: v.avatar }))
+    readonly property bool eyeShown: DiscordBridge.streamLive && viewers.length > 0
 
     // The feed: newest first, each line fades out after a few seconds
     property var lines: []
@@ -137,6 +142,14 @@ Scope {
         text: person.deafened ? String.fromCodePoint(0xF07CE) : person.muted ? String.fromCodePoint(0xF036D) : ""
         color: Theme.danger
         font.family: Theme.iconFont
+    }
+
+    // An eye and how many watch your stream; only on your own entry while it runs
+    component Eye: Outlined {
+        required property var person
+        visible: person.you === true && root.eyeShown
+        text: `◉ ${root.viewers.length}`
+        color: Theme.primary
     }
 
     PanelWindow {
@@ -280,6 +293,27 @@ Scope {
                                 person: row.modelData
                                 anchors.verticalCenter: parent.verticalCenter
                             }
+                            Eye {
+                                person: row.modelData
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            // The viewers' faces, smaller than the members'; the list look only
+                            Row {
+                                visible: row.modelData.you === true && root.eyeShown && Config.voiceOverlayLook === "list"
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 5
+
+                                Repeater {
+                                    model: row.modelData.you === true ? root.viewers : []
+
+                                    delegate: Face {
+                                        required property var modelData
+                                        person: modelData
+                                        width: 20
+                                        height: 20
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -314,6 +348,13 @@ Scope {
                                     x: 31
                                     y: 14
                                     font.pixelSize: 12
+                                }
+                                // Bottom left, the mute icon has the bottom right
+                                Eye {
+                                    person: cell.modelData
+                                    x: 0
+                                    y: 16
+                                    font.pixelSize: 11
                                 }
                             }
                             Outlined {
