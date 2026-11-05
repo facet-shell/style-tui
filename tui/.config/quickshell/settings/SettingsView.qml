@@ -132,6 +132,15 @@ FocusScope {
 
     FileView {
         id: themeState
+        path: `${root.stateDir}/theme-tui`
+        printErrors: false
+        // facet theme set writes it while the page is open: the pick follows at once
+        watchChanges: true
+        onFileChanged: reload()
+    }
+
+    FileView {
+        id: themeLegacy
         path: `${root.stateDir}/theme`
         printErrors: false
     }
@@ -142,7 +151,8 @@ FocusScope {
         printErrors: false
     }
 
-    readonly property string currentTheme: themeState.text().trim() || "periwinkle"
+    // Each style keeps its own theme (facet: theme-<style>); before that it was "theme"
+    readonly property string currentTheme: themeState.text().trim() || themeLegacy.text().trim() || "periwinkle"
     readonly property string currentLayout: layoutState.text().trim() === "canvas" ? "canvas" : "tiling"
 
     // ── Building blocks ──────────────────────────────────────
