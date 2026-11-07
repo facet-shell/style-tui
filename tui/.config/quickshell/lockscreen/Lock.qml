@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.config
+import qs.services
 
 // Session lock with a blurred snapshot of the desktop behind it.
 //
@@ -130,6 +131,11 @@ Scope {
 
     // frame-wallpaper pause|resume (wallpaper package); nothing happens without it
     function wallpapers(action) {
+        if (Wallpapers.useGlint) {
+            if (action === "pause") Wallpapers.pauseGlint("locked");
+            else Wallpapers.resumeGlint("locked");
+            return;
+        }
         Quickshell.execDetached(["sh", "-c", `w="$HOME/.local/bin/frame-wallpaper"; [ -x "$w" ] && "$w" "$1"`, "frame-lock", action]);
     }
 

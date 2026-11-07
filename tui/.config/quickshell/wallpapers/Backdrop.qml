@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.config
+import qs.services
 
 // Still wallpapers and the plain background, drawn by the shell on the background layer
 // (swaybg did this before). frame-wallpaper still owns the state and runs the moving ones,
@@ -42,6 +43,9 @@ Scope {
     // The picture for a screen ("" = just the background color), or null when a backend
     // draws that screen
     function shownOn(name) {
+        if (Wallpapers.glintActive && Wallpapers.glintOutputs.some(output =>
+                output.name === name && !!output.wallpaper?.path))
+            return null;
         const screens = state.screens ?? {};
         const entry = screens[name] ?? screens["*"] ?? null;
         if (!entry || !entry.path)
@@ -98,6 +102,12 @@ Scope {
             }
 
             onPictureChanged: {
+                if (Wallpapers.glintActive) {
+                    if (picture !== null) last = picture;
+                    holding = false;
+                    shown = picture !== null;
+                    return;
+                }
                 if (picture !== null) {
                     last = picture;
                     holding = false;

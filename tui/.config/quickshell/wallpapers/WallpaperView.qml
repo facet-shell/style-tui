@@ -18,6 +18,12 @@ Item {
     property string target: "*"
     property int current: 0
 
+    readonly property var displayOptions: Wallpapers.optionsFor(target)
+    onDisplayOptionsChanged: {
+        if (!Wallpapers.useGlint) return;
+        if (!fpsSave.running) fpsSlider.pending = displayOptions.fps;
+        if (!volumeSave.running) volumeSlider.pending = Math.round(displayOptions.volume * 100);
+    }
     readonly property int columns: 4
     readonly property var kinds: ({ both: ["scene", "video", "image"], mpv: ["video", "image"], image: ["image"] })[Wallpapers.settings.backend] ?? []
     readonly property var shown: filter(Wallpapers.items, query, type)
@@ -68,13 +74,13 @@ Item {
     Timer {
         id: fpsSave
         interval: 600
-        onTriggered: Wallpapers.option("fps", fpsSlider.pending)
+        onTriggered: Wallpapers.useGlint ? Wallpapers.setDisplaySetting(root.target, "fps", fpsSlider.pending) : Wallpapers.option("fps", fpsSlider.pending)
     }
 
     Timer {
         id: volumeSave
         interval: 600
-        onTriggered: Wallpapers.option("volume", volumeSlider.pending)
+        onTriggered: Wallpapers.useGlint ? Wallpapers.setDisplaySetting(root.target, "volume", volumeSlider.pending / 100) : Wallpapers.option("volume", volumeSlider.pending)
     }
 
     // The sliders follow the saved state unless a change is still waiting to be saved
@@ -381,6 +387,7 @@ Item {
 
                     Section {
                         label: "backend"
+                        visible: !Wallpapers.useGlint
 
                         Row {
                             spacing: 6
@@ -461,16 +468,17 @@ Item {
                                 Chip {
                                     required property string modelData
                                     text: modelData
-                                    active: Wallpapers.settings.scaling === modelData
-                                    onClicked: Wallpapers.option("scaling", modelData)
+                                    active: (Wallpapers.useGlint ? root.displayOptions.scaling : Wallpapers.settings.scaling) === modelData
+                                    onClicked: Wallpapers.useGlint ? Wallpapers.setDisplaySetting(root.target, "scaling", modelData) : Wallpapers.option("scaling", modelData)
                                 }
                             }
                         }
 
                         RowLayout {
                             Layout.fillWidth: true
-                            Label { Layout.fillWidth: true; text: "pause in fullscreen"; color: Theme.muted; font.pixelSize: 14 }
+                            Label { Layout.fillWidth: true; visible: !Wallpapers.useGlint; text: "pause in fullscreen"; color: Theme.muted; font.pixelSize: 14 }
                             Chip {
+                                visible: !Wallpapers.useGlint
                                 text: Wallpapers.settings.pause ? "on" : "off"
                                 active: Wallpapers.settings.pause === true
                                 onClicked: Wallpapers.option("pause", !Wallpapers.settings.pause)
@@ -478,11 +486,17 @@ Item {
                         }
                     }
 
+                    GlintProperties {
+                        Layout.fillWidth: true
+                        visible: Wallpapers.useGlint
+                        output: root.target
+                        projectPath: root.shown[root.current]?.path ?? ""
+                    }
                     Item { Layout.fillHeight: true }
 
                     Label {
                         Layout.fillWidth: true
-                        text: "←→↑↓ select · enter set · esc close\nframe wallpaper backend changes the backend from a terminal\nthe lockscreen blurs a still snapshot"
+                        text: Wallpapers.useGlint ? "Glint · ←→↑↓ select · enter set · esc close" : "←→↑↓ select · enter set · esc close\nframe wallpaper backend changes the backend from a terminal\nthe lockscreen blurs a still snapshot"
                         color: Theme.frame
                         font.pixelSize: 12
                         wrapMode: Text.WordWrap

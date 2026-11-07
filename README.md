@@ -23,3 +23,14 @@ facet add style-tui
 Files in the package folders are linked into your home with GNU Stow; files with colors come
 from `templates/` and are written by `facet theme` in the active theme. Ideas and bugs:
 [the board](https://github.com/orgs/facet-shell/projects/1).
+
+## Glint wallpapers
+
+Install the matching core and CLI updates with `facet install quickshell hypr wallpaper`.
+Super+W controls Glint directly, including target display selection, frame rate,
+volume, scaling and the selected wallpaper's authored properties. The background
+surface yields to Glint on assigned displays, and locking pauses its rendering.
+The standalone `glint tui` interface is independent of this Quickshell style.
+
+Run the offscreen native-view smoke test from core with
+`python3 tests/glint/run-smoke.py --tui /path/to/style-tui`.
