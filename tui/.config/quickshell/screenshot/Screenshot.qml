@@ -8,7 +8,7 @@ import qs.components
 import qs.config
 import qs.services
 
-// Screenshots in the shell's own frame: Print freezes every screen (the shot is cut out of
+// Screenshots in the shell's own facet: Print freezes every screen (the shot is cut out of
 // that frozen picture, so it shows the moment the key was pressed), you drag a region or
 // click a window (it lights up under the cursor), Enter takes the whole screen, Esc
 // cancels. Shift+Print takes the focused screen right away. The picture goes to
@@ -47,7 +47,7 @@ Scope {
     // shows exactly those pictures and the shot is cut out of them (ffmpeg crop). Menus,
     // tooltips and video frames are taken as they were when the key was pressed. Without
     // ffmpeg, or for a recording, the picker works on the live screen as before.
-    readonly property string frozenDir: `${Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"}/frame-shot`
+    readonly property string frozenDir: `${Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"}/facet-shot`
     property bool frozen: false
     property bool hasFfmpeg: false
 
@@ -66,7 +66,7 @@ Scope {
             return;
         }
         // The picker opens once the screens are taken, so it is not in them
-        freezeProc.command = ["bash", "-c", 'd=$1; shift; mkdir -p "$d" && rm -f "$d"/*.png; for n in "$@"; do grim -o "$n" "$d/$n.png" & done; wait; for n in "$@"; do [ -s "$d/$n.png" ] || exit 1; done', "frame-freeze", frozenDir]
+        freezeProc.command = ["bash", "-c", 'd=$1; shift; mkdir -p "$d" && rm -f "$d"/*.png; for n in "$@"; do grim -o "$n" "$d/$n.png" & done; wait; for n in "$@"; do [ -s "$d/$n.png" ] || exit 1; done', "facet-freeze", frozenDir]
             .concat(Quickshell.screens.map(s => s.name));
         freezeProc.running = true;
     }
@@ -79,7 +79,7 @@ Scope {
 
     // The frozen screens sit in RAM (XDG_RUNTIME_DIR); gone once the shot is taken or cancelled
     function dropFrozen() {
-        Quickshell.execDetached(["sh", "-c", 'rm -f "$1"/*.png', "frame-freeze", frozenDir]);
+        Quickshell.execDetached(["sh", "-c", 'rm -f "$1"/*.png', "facet-freeze", frozenDir]);
     }
 
     Process {
@@ -157,7 +157,7 @@ Scope {
             return;
         pendingFile = `${folder}/screenshot-${stamp()}.png`;
         open = false;
-        grimProc.command = ["sh", "-c", 'f=$1; shift; mkdir -p "$(dirname "$f")" && "$@" "$f" && wl-copy --type image/png < "$f"', "frame-shot", pendingFile].concat(cmd);
+        grimProc.command = ["sh", "-c", 'f=$1; shift; mkdir -p "$(dirname "$f")" && "$@" "$f" && wl-copy --type image/png < "$f"', "facet-shot", pendingFile].concat(cmd);
         grimProc.running = true;
     }
 
@@ -180,7 +180,7 @@ Scope {
                 Recorder.start(root.pendingArgs);
                 return;
             }
-            grimProc.command = ["sh", "-c", 'mkdir -p "$(dirname "$1")" && grim "$2" "$3" "$1" && wl-copy --type image/png < "$1"', "frame-shot", root.pendingFile].concat(root.pendingArgs);
+            grimProc.command = ["sh", "-c", 'mkdir -p "$(dirname "$1")" && grim "$2" "$3" "$1" && wl-copy --type image/png < "$1"', "facet-shot", root.pendingFile].concat(root.pendingArgs);
             grimProc.running = true;
         }
     }

@@ -46,7 +46,7 @@ Item {
     function filter(items, query, type) {
         const q = query.trim().toLowerCase();
         return items.filter(w => {
-            // frame-wallpaper list leaves out what the engine cannot show (web, presets, gif scenes)
+            // facet-wallpaper list leaves out what the engine cannot show (web, presets, gif scenes)
             const kind = w.kind;
             if (type !== "all" && kind !== type)
                 return false;

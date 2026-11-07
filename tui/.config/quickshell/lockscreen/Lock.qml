@@ -129,14 +129,14 @@ Scope {
         }
     }
 
-    // frame-wallpaper pause|resume (wallpaper package); nothing happens without it
+    // facet-wallpaper pause|resume (wallpaper package); nothing happens without it
     function wallpapers(action) {
         if (Wallpapers.useGlint) {
             if (action === "pause") Wallpapers.pauseGlint("locked");
             else Wallpapers.resumeGlint("locked");
             return;
         }
-        Quickshell.execDetached(["sh", "-c", `w="$HOME/.local/bin/frame-wallpaper"; [ -x "$w" ] && "$w" "$1"`, "frame-lock", action]);
+        Quickshell.execDetached(["sh", "-c", `w="$HOME/.local/bin/facet-wallpaper"; [ -x "$w" ] && "$w" "$1"`, "facet-lock", action]);
     }
 
     Timer {
@@ -308,7 +308,7 @@ Scope {
     Process {
         id: sleepDelay
         running: true
-        command: ["systemd-inhibit", "--what=sleep", "--mode=delay", "--who=frameshell",
+        command: ["systemd-inhibit", "--what=sleep", "--mode=delay", "--who=facet",
             "--why=lock the screen before sleep", "sleep", "infinity"]
     }
 

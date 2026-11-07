@@ -109,7 +109,7 @@ Scope {
         loadPeaks();
     }
 
-    // The separate channels the recorder wrote (Recorder.qml, frame-record-mix tracks), lined up
+    // The separate channels the recorder wrote (Recorder.qml, facet-record-mix tracks), lined up
     // by the moment each recorder and the picture started
     function recordedTracks() {
         const dir = Recorder.tracksDir(video);
@@ -351,7 +351,7 @@ Scope {
 
     property bool exporting: false
     // "export & delete raw": once the export worked, the original goes into the trash with
-    // what belongs to it (frame-media trash), and the editor closes
+    // what belongs to it (facet-media trash), and the editor closes
     property bool deleteAfterExport: false
     signal originalDeleted()
     property real exportProgress: 0
@@ -499,7 +499,7 @@ Scope {
             const removed = root.deleteAfterExport;
             if (removed) {
                 root.deleteAfterExport = false;
-                Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/frame-media`, "trash", root.video]);
+                Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/facet-media`, "trash", root.video]);
                 root.originalDeleted();
             }
             Notifications.push({
@@ -518,7 +518,7 @@ Scope {
                     else if (id === "folder")
                         Quickshell.execDetached(["xdg-open", file.slice(0, file.lastIndexOf("/"))]);
                     else if (id === "copy")
-                        Quickshell.execDetached(["sh", "-c", 'printf "file://%s\\n" "$1" | wl-copy --type text/uri-list', "frame-edit", file]);
+                        Quickshell.execDetached(["sh", "-c", 'printf "file://%s\\n" "$1" | wl-copy --type text/uri-list', "facet-edit", file]);
                 }
             });
         }

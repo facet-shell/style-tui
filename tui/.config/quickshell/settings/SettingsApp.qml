@@ -29,7 +29,7 @@ Scope {
         id: window
 
         visible: root.open
-        title: "frameshell · settings"
+        title: "facet · settings"
         implicitWidth: 1160
         implicitHeight: 800
         color: Theme.bg

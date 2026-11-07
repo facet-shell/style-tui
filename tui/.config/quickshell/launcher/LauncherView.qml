@@ -62,7 +62,7 @@ Item {
         input.cursorPosition = text.length;
     }
 
-    // Types text at the cursor, over a selection (Ctrl+Alt+Q → @, frame/shell.lua)
+    // Types text at the cursor, over a selection (Ctrl+Alt+Q → @, facet/shell.lua)
     function type(text) {
         if (input.selectedText !== "")
             input.remove(input.selectionStart, input.selectionEnd);

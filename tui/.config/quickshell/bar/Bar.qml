@@ -508,8 +508,8 @@ Scope {
                             Muted { text: root.keymap; visible: root.keymap !== "" }
                             Bracket { text: "]"; visible: root.keymap !== "" }
 
-                            // Package and frameshell updates (services/Updates.qml): only there when
-                            // there are some; hovering names the frameshell repos that are behind.
+                            // Package and facet updates (services/Updates.qml): only there when
+                            // there are some; hovering names the facet repos that are behind.
                             // Click runs them in Ghostty (only `facet update` when no package waits).
                             Bracket { text: "─["; visible: updatesItem.visible }
                             Item {

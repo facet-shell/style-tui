@@ -49,8 +49,8 @@ Scope {
         id: window
 
         visible: root.open
-        title: Editor.isVideo(root.file) ? "frameshell · video editor"
-            : root.file.includes("/paintings/") ? "frameshell · paint" : "frameshell · picture editor"
+        title: Editor.isVideo(root.file) ? "facet · video editor"
+            : root.file.includes("/paintings/") ? "facet · paint" : "facet · picture editor"
         implicitWidth: 1480
         implicitHeight: 940
         color: Theme.bg

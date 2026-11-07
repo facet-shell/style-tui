@@ -65,7 +65,7 @@ ShellRoot {
     }
 
     // Separate wallpaper app (Super+W)
-    // Still wallpapers and the plain background (the moving ones come from frame-wallpaper)
+    // Still wallpapers and the plain background (the moving ones come from facet-wallpaper)
     Backdrop {}
 
     WallpaperApp {
@@ -100,7 +100,7 @@ ShellRoot {
         hidden: lock.active
     }
 
-    // Hold Super for 1.5 seconds (hypr/frame/hotkeys.lua); closed while locked or
+    // Hold Super for 1.5 seconds (hypr/facet/hotkeys.lua); closed while locked or
     // while Super is busy with the canvas overview
     HotkeyOverlay {
         id: hotkeys
@@ -124,7 +124,7 @@ ShellRoot {
         hidden: lock.active
     }
 
-    // Print: region or window, Shift+Print: the screen (hypr/frame/shell.lua)
+    // Print: region or window, Shift+Print: the screen (hypr/facet/shell.lua)
     Screenshot {
         hidden: lock.active
     }

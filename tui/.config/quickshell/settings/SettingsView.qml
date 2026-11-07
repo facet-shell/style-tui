@@ -9,7 +9,7 @@ import qs.config
 import qs.services
 
 // The settings app's content: sections on the left, their settings on the right.
-// Shell settings go through Config (kept in ~/.config/frameshell/shell.json, "default" puts
+// Shell settings go through Config (kept in ~/.config/facet/shell.json, "default" puts
 // one back); theme and layout through the frame command; installing, boot and login, which
 // need sudo, open in a terminal of their own.
 FocusScope {
@@ -34,8 +34,8 @@ FocusScope {
     readonly property string home: Quickshell.env("HOME")
     // The facet command (it was called frame before, and that link is gone since)
     readonly property string frameBin: `${home}/.local/bin/facet`
-    readonly property string stateDir: `${Quickshell.env("XDG_STATE_HOME") || home + "/.local/state"}/frameshell`
-    readonly property string modulesDir: `${Quickshell.env("XDG_DATA_HOME") || home + "/.local/share"}/frameshell/modules`
+    readonly property string stateDir: `${Quickshell.env("XDG_STATE_HOME") || home + "/.local/state"}/facet`
+    readonly property string modulesDir: `${Quickshell.env("XDG_DATA_HOME") || home + "/.local/share"}/facet/modules`
 
     // [{ id, name, colors }] from the frame command's themes
     property var themes: []
@@ -67,7 +67,7 @@ FocusScope {
     // frame commands that need sudo or show output: their own Ghostty, open until Enter
     function inTerminal(title, args) {
         Quickshell.execDetached(["ghostty", "--gtk-single-instance=false", `--title=${title}`, "-e", "sh", "-c",
-            '"$@"; printf "\\nDone. Enter closes this window."; read _', "frame-settings"].concat(args));
+            '"$@"; printf "\\nDone. Enter closes this window."; read _', "facet-settings"].concat(args));
     }
 
     // frame commands without questions: in the background, the last line as the status
@@ -86,7 +86,7 @@ FocusScope {
 
     Process {
         id: themesProc
-        command: ["sh", "-c", 'd="${XDG_DATA_HOME:-$HOME/.local/share}/frameshell/cli/themes/tui"; jq -c -n \'[inputs | { id: (input_filename | split("/") | last | rtrimstr(".json")), name, colors }]\' "$d"/*.json']
+        command: ["sh", "-c", 'd="${XDG_DATA_HOME:-$HOME/.local/share}/facet/cli/themes/tui"; jq -c -n \'[inputs | { id: (input_filename | split("/") | last | rtrimstr(".json")), name, colors }]\' "$d"/*.json']
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -100,7 +100,7 @@ FocusScope {
 
     Process {
         id: modulesProc
-        command: ["sh", "-c", 'for d in "$1"/*/; do [ -d "$d.git" ] && basename "$d"; done', "frame-settings", root.modulesDir]
+        command: ["sh", "-c", 'for d in "$1"/*/; do [ -d "$d.git" ] && basename "$d"; done', "facet-settings", root.modulesDir]
         stdout: StdioCollector {
             onStreamFinished: root.installed = this.text.split("\n").filter(l => l !== "")
         }
@@ -109,7 +109,7 @@ FocusScope {
     Process {
         id: aboutProc
         command: ["sh", "-c", 'hyprctl version 2>/dev/null | head -1; qs --version 2>/dev/null | head -1; printf "kernel %s\\n" "$(uname -r)"; '
-            + 'for d in "$1"/*/; do [ -d "$d.git" ] && printf "%s %s\\n" "$(basename "$d")" "$(git -C "$d" log -1 --format="%h · %cr" 2>/dev/null)"; done', "frame-settings", root.modulesDir]
+            + 'for d in "$1"/*/; do [ -d "$d.git" ] && printf "%s %s\\n" "$(basename "$d")" "$(git -C "$d" log -1 --format="%h · %cr" 2>/dev/null)"; done', "facet-settings", root.modulesDir]
         stdout: StdioCollector {
             onStreamFinished: root.about = this.text.trim()
         }
@@ -1589,7 +1589,7 @@ FocusScope {
                                 if (Updates.total > 0)
                                     parts.push(`${Updates.total} packages waiting (${Updates.aurCount} from the AUR)`);
                                 if (Updates.frameCount > 0)
-                                    parts.push(`frameshell: ${Updates.frameList.map(r => `${r.name} ${r.from} → ${r.to}`).join(", ")}`);
+                                    parts.push(`facet: ${Updates.frameList.map(r => `${r.name} ${r.from} → ${r.to}`).join(", ")}`);
                                 return parts.length > 0 ? `${parts.join("; ")}, then facet update` : "everything is up to date";
                             }
 
@@ -1602,8 +1602,8 @@ FocusScope {
                         }
                         BoolSetting {
                             key: "frameUpdates"
-                            title: "frameshell updates"
-                            hint: "show frameshell updates in the bar: the CLI and modules behind GitHub"
+                            title: "facet updates"
+                            hint: "show facet updates in the bar: the CLI and modules behind GitHub"
                         }
 
                         Setting {

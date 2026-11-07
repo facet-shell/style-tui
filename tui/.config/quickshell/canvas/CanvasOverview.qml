@@ -19,7 +19,7 @@ import qs.services
 // Enter go there, Q close it. Esc or right click goes back without changing anything.
 //
 // `qs ipc call overview toggle|open|close|zoomIn|zoomOut`; the Super+wheel binds are in
-// hypr/frame/canvas.lua, everything else the overlay handles itself.
+// hypr/facet/canvas.lua, everything else the overlay handles itself.
 Scope {
     id: root
 

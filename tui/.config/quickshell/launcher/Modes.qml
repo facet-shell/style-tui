@@ -610,7 +610,7 @@ Item {
 
     function clipRows(rest) {
         if (!Clipboard.loaded)
-            return [info("reading clipboard history …", "from frame-clip")];
+            return [info("reading clipboard history …", "from facet-clip")];
         const q = rest.toLowerCase();
         const list = Clipboard.entries.filter(e => q === "" || e.text.toLowerCase().includes(q)).slice(0, 60);
         if (list.length === 0)

@@ -24,7 +24,7 @@ Scope {
         id: window
 
         visible: root.open
-        title: "frameshell · media"
+        title: "facet · media"
         implicitWidth: 1320
         implicitHeight: 860
         color: Theme.bg

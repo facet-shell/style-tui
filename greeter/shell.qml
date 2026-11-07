@@ -6,7 +6,7 @@ import Quickshell.Services.Greetd
 import qs.ui
 
 // The login screen, in the lockscreen's clothes: clock, date, one password field for the
-// one person who uses this machine. greetd runs it (frame-greeter-session) and starts the
+// one person who uses this machine. greetd runs it (facet-greeter-session) and starts the
 // session once the password is right. greeter.json next to this file says who and what:
 //   { "user": "name", "command": ["/usr/bin/start-hyprland"] }
 // Installed by `facet login`; `qs -p greeter` shows it inside a running desktop too (then
@@ -142,7 +142,7 @@ ShellRoot {
 
         readonly property bool primary: true
 
-        title: "frameshell login"
+        title: "facet login"
         color: Theme.bg
         minimumSize: Qt.size(960, 540)
         implicitWidth: 1920
@@ -296,7 +296,7 @@ ShellRoot {
             Label {
                 visible: window.primary
                 anchors { right: parent.right; bottom: parent.bottom; rightMargin: 80; bottomMargin: 80 }
-                text: "frameshell"
+                text: "facet"
                 color: Theme.frame
                 font.pixelSize: Theme.size.small
                 opacity: window.stage(0.45)

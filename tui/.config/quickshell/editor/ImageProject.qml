@@ -209,7 +209,7 @@ Scope {
 
     property bool exporting: false
     // "export & delete raw": once the export worked, the original goes into the trash with
-    // what belongs to it (frame-media trash), and the editor closes
+    // what belongs to it (facet-media trash), and the editor closes
     property bool deleteAfterExport: false
     signal originalDeleted()
     property string exportError: ""
@@ -284,7 +284,7 @@ Scope {
             runExport();
             return;
         }
-        drawingFile = `${Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"}/frame-draw-${Date.now()}.png`;
+        drawingFile = `${Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"}/facet-draw-${Date.now()}.png`;
         drawingNeeded(drawingFile);
     }
 
@@ -329,7 +329,7 @@ Scope {
             const removed = root.deleteAfterExport;
             if (removed) {
                 root.deleteAfterExport = false;
-                Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/frame-media`, "trash", root.image]);
+                Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/facet-media`, "trash", root.image]);
                 root.originalDeleted();
             }
             Notifications.push({
@@ -347,7 +347,7 @@ Scope {
                         Quickshell.execDetached(["xdg-open", file]);
                     else if (id === "copy")
                         // As the picture itself, for pasting into chats
-                        Quickshell.execDetached(["sh", "-c", 'wl-copy --type image/png < "$1"', "frame-edit", file]);
+                        Quickshell.execDetached(["sh", "-c", 'wl-copy --type image/png < "$1"', "facet-edit", file]);
                     else if (id === "folder")
                         Quickshell.execDetached(["xdg-open", file.slice(0, file.lastIndexOf("/"))]);
                 }

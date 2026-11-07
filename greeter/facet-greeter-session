@@ -1,16 +1,16 @@
 #!/bin/bash
-# frameshell greeter session for greetd: the lockscreen's look as the login screen.
+# facet greeter session for greetd: the lockscreen's look as the login screen.
 # Quickshell draws it (greeter/shell.qml); the compositor underneath is the small one
 # CachyOS ships with noctalia-greeter, or cage when that is missing. Installed by
-# `facet login` to /usr/share/frameshell/greeter and set as greetd's default_session.
+# `facet login` to /usr/share/facet/greeter and set as greetd's default_session.
 set -u
 
-DIR="${FRAME_GREETER_DIR:-/usr/share/frameshell/greeter}"
+DIR="${FRAME_GREETER_DIR:-/usr/share/facet/greeter}"
 
 # Nothing may paint the VT; what the greeter prints goes to the journal instead
-# (journalctl -t frame-greeter), so a broken start can be looked into
+# (journalctl -t facet-greeter), so a broken start can be looked into
 if command -v logger >/dev/null 2>&1; then
-    exec > >(logger -t frame-greeter) 2>&1
+    exec > >(logger -t facet-greeter) 2>&1
 else
     exec >/dev/null 2>&1
 fi
@@ -19,11 +19,11 @@ fi
 # folder. Never a fixed name in /tmp: another user could create it first and sit
 # between the greeter and its compositor.
 if [ -z "${XDG_RUNTIME_DIR:-}" ] || [ ! -d "$XDG_RUNTIME_DIR" ] || [ ! -O "$XDG_RUNTIME_DIR" ]; then
-    XDG_RUNTIME_DIR=$(mktemp -d /tmp/frameshell-greeter.XXXXXX) || exit 1
+    XDG_RUNTIME_DIR=$(mktemp -d /tmp/facet-greeter.XXXXXX) || exit 1
 fi
 chmod 700 "$XDG_RUNTIME_DIR" || exit 1
 export XDG_RUNTIME_DIR
-echo "frameshell greeter: runtime dir $XDG_RUNTIME_DIR, files ${FRAME_GREETER_DIR:-/usr/share/frameshell/greeter}"
+echo "facet greeter: runtime dir $XDG_RUNTIME_DIR, files ${FRAME_GREETER_DIR:-/usr/share/facet/greeter}"
 export XDG_CACHE_HOME="$XDG_RUNTIME_DIR/cache"
 export XDG_CONFIG_HOME="$XDG_RUNTIME_DIR/config"
 export XDG_DATA_HOME="$XDG_RUNTIME_DIR/data"
@@ -42,5 +42,5 @@ if [ -x /usr/bin/noctalia-greeter-compositor ]; then
 elif command -v cage >/dev/null 2>&1; then
     exec cage -s -- qs -p "$DIR"
 fi
-echo "frameshell greeter: neither noctalia-greeter-compositor nor cage found"
+echo "facet greeter: neither noctalia-greeter-compositor nor cage found"
 exit 1

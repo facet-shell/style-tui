@@ -6,11 +6,11 @@ import qs.config
 import qs.services
 
 // Still wallpapers and the plain background, drawn by the shell on the background layer
-// (swaybg did this before). frame-wallpaper still owns the state and runs the moving ones,
+// (swaybg did this before). facet-wallpaper still owns the state and runs the moving ones,
 // mpvpaper and linux-wallpaperengine; a screen showing one of those gets no window from
 // here, so the video is never covered.
 //
-// State: ~/.local/state/frameshell/wallpaper.json
+// State: ~/.local/state/facet/wallpaper.json
 //   { backend: "both" | "mpv" | "image", scaling: "fill" | "fit",
 //     screens: { "<monitor>" | "*": { path, kind: "image" | "video" | "scene" | … } } }
 Scope {
@@ -20,7 +20,7 @@ Scope {
     // After the first read: only a change made while the shell runs holds the old picture
     property bool ready: false
 
-    // frame-wallpaper ended a switch: "up" (the new backend draws), "died" or "timeout"
+    // facet-wallpaper ended a switch: "up" (the new backend draws), "died" or "timeout"
     signal switched(string outcome)
 
     // Workshop items are folders, files have an extension
@@ -28,7 +28,7 @@ Scope {
         return !/\.[A-Za-z0-9]{2,5}$/.test(path);
     }
 
-    // What the backend runs itself (mirrors allowed() in frame-wallpaper)
+    // What the backend runs itself (mirrors allowed() in facet-wallpaper)
     function moving(entry) {
         const backend = state.backend ?? "both";
         if (entry.kind === "image")
@@ -56,7 +56,7 @@ Scope {
     }
 
     FileView {
-        path: `${Quickshell.env("HOME")}/.local/state/frameshell/wallpaper.json`
+        path: `${Quickshell.env("HOME")}/.local/state/facet/wallpaper.json`
         printErrors: false
         watchChanges: true
         onFileChanged: reload()
@@ -70,9 +70,9 @@ Scope {
         }
     }
 
-    // "<ticket> <outcome>", written by frame-wallpaper once a switch has ended
+    // "<ticket> <outcome>", written by facet-wallpaper once a switch has ended
     FileView {
-        path: `${Quickshell.env("HOME")}/.local/state/frameshell/wallpaper.shown`
+        path: `${Quickshell.env("HOME")}/.local/state/facet/wallpaper.shown`
         printErrors: false
         watchChanges: true
         onFileChanged: reload()
@@ -143,7 +143,7 @@ Scope {
                 }
             }
 
-            // In case the end of the switch is never reported (frame-wallpaper waits 30 s at most)
+            // In case the end of the switch is never reported (facet-wallpaper waits 30 s at most)
             Timer {
                 id: holdEnd
                 interval: 32000

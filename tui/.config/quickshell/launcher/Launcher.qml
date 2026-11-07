@@ -102,7 +102,7 @@ Scope {
             root.show();
         }
 
-        // Super+V: the clipboard history (frame-clip), like Windows
+        // Super+V: the clipboard history (facet-clip), like Windows
         function clipboard(): void {
             root.show("; ");
         }
@@ -117,7 +117,7 @@ Scope {
             root.show(text);
         }
 
-        // Types into the open launcher; Ctrl+Alt+Q (frame/shell.lua) sends its @ here, the
+        // Types into the open launcher; Ctrl+Alt+Q (facet/shell.lua) sends its @ here, the
         // launcher is no window that sendshortcut could reach
         function type(text: string): void {
             if (root.open)

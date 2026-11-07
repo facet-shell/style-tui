@@ -5,7 +5,7 @@ import qs.config
 import qs.services
 
 // Keyboard app UI: the picked board as a map on top (its rows come from the board registry,
-// frame-keyboard board --json), below it the tabs the board can do (lighting, fn keys, colors),
+// facet-keyboard board --json), below it the tabs the board can do (lighting, fn keys, colors),
 // at the bottom what the last command sent (or, in a dry run, would have sent).
 // Keys carry their physical id (US names) and a QWERTZ label.
 Item {
@@ -359,7 +359,7 @@ Item {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         color: Keyboard.connected ? Theme.text : Theme.muted
-                        text: !Keyboard.available ? "frame-keyboard is not in ~/.local/bin (facet add keyboard)"
+                        text: !Keyboard.available ? "facet-keyboard is not in ~/.local/bin (facet add keyboard)"
                             : Keyboard.connected ? `${Keyboard.boardName} · usb cable${Keyboard.info?.node ? " · " + Keyboard.info.node : ""}`
                             : Keyboard.dongleOnly ? "only the 2.4 GHz dongle is there · plug the cable in"
                             : `no ${Keyboard.boardName} on the USB cable · another board: facet keyboard set`
@@ -383,7 +383,7 @@ Item {
                         }
                     }
 
-                    // Off: frame-keyboard only prints what it would send
+                    // Off: facet-keyboard only prints what it would send
                     Chip {
                         text: Keyboard.live ? "live · sends to the keyboard" : "dry run"
                         active: Keyboard.live

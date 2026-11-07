@@ -20,7 +20,7 @@ Singleton {
     readonly property color text: "#e1e4ff"
     readonly property color textDim: "#bcc1ea"
     readonly property color muted: "#8086b8"
-    readonly property color frame: "#545b96"
+    readonly property color facet: "#545b96"
     readonly property color border: "#1e2256"
     readonly property color danger: "#ff6b9a"
     readonly property color warn: "#f2c97d"

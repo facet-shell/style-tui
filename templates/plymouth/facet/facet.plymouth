@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=facet
+Description=facet boot splash ({{name}}): a frame with the wordmark, a progress line and the disk password
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/facet
+ScriptFile=/usr/share/plymouth/themes/facet/facet.script
