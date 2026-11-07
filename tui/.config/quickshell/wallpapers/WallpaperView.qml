@@ -18,7 +18,7 @@ Item {
     property string target: "*"
     property int current: 0
 
-    readonly property var displayOptions: Wallpapers.optionsFor(target)
+    readonly property var displayOptions: Wallpapers.globalOptions()
     onDisplayOptionsChanged: {
         if (!Wallpapers.useGlint) return;
         if (!fpsSave.running) fpsSlider.pending = displayOptions.fps;
@@ -458,7 +458,7 @@ Item {
                     }
 
                     Section {
-                        label: "display"
+                        label: Wallpapers.useGlint ? "global display settings" : "display"
 
                         RowLayout {
                             Layout.fillWidth: true
