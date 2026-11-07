@@ -269,7 +269,7 @@ FocusScope {
 
                                 o: project.overlays[index] ?? null
                                 store: project
-                                facet: frameArea
+                                frame: frameArea
                                 capture: picture
                                 nativeWidth: project.imageWidth
                                 selected: o !== null && root.selOverlay !== null && root.selOverlay.id === o.id

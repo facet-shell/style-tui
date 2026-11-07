@@ -3,6 +3,7 @@ import QtQuick.Window
 import Quickshell
 import qs.wallpapers
 import qs.services
+import qs.config
 
 ShellRoot {
     id: test
@@ -21,6 +22,7 @@ ShellRoot {
         repeat: true
         onTriggered: {
             if (test.phase === 0) {
+                if (Theme.frame === undefined) { console.error("Structural theme frame token missing"); Qt.exit(1); return; }
                 if (!Wallpapers.glintActive || controls.properties.length !== 5) { console.error("Tui native properties missing"); Qt.exit(1); return; }
                 Wallpapers.setDisplaySetting("*", "fps", 120);
             } else if (test.phase === 1) {

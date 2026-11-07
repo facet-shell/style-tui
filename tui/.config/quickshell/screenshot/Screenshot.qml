@@ -8,7 +8,7 @@ import qs.components
 import qs.config
 import qs.services
 
-// Screenshots in the shell's own facet: Print freezes every screen (the shot is cut out of
+// Screenshots in the shell's own frame: Print freezes every screen (the shot is cut out of
 // that frozen picture, so it shows the moment the key was pressed), you drag a region or
 // click a window (it lights up under the cursor), Enter takes the whole screen, Esc
 // cancels. Shift+Print takes the focused screen right away. The picture goes to

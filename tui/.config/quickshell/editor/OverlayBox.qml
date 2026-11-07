@@ -14,7 +14,7 @@ Item {
 
     property var o: null
     property var store: null
-    property Item facet: null
+    property Item frame: null
     property Item capture: null
     // Pixel width of the original, so a blur's strength looks alike in the preview and the export
     property real nativeWidth: 1

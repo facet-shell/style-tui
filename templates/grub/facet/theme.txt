@@ -7,7 +7,7 @@
 
 title-text: ""
 desktop-color: "{{colors.bg}}"
-terminal-font: "Frame Mono Regular 16"
+terminal-font: "Facet Mono Regular 16"
 terminal-left: "10%"
 terminal-top: "10%"
 terminal-width: "80%"
@@ -31,7 +31,7 @@ terminal-border: "0"
   width = 120
   height = 20
   text = "select system"
-  font = "Frame Mono Regular 14"
+  font = "Facet Mono Regular 14"
   color = "{{colors.primary}}"
 }
 
@@ -72,8 +72,8 @@ terminal-border: "0"
   top = 30%+22
   width = 600
   height = 226
-  item_font = "Frame Mono Regular 16"
-  selected_item_font = "Frame Mono Bold 16"
+  item_font = "Facet Mono Regular 16"
+  selected_item_font = "Facet Mono Bold 16"
   item_color = "{{colors.textDim}}"
   selected_item_color = "{{colors.secondary}}"
   item_height = 30
@@ -95,7 +95,7 @@ terminal-border: "0"
   width = 300
   height = 20
   text = "booting in %ds"
-  font = "Frame Mono Regular 14"
+  font = "Facet Mono Regular 14"
   color = "{{colors.textDim}}"
 }
 
@@ -106,7 +106,7 @@ terminal-border: "0"
   height = 20
   align = "right"
   text = "↑↓ select · enter boot · e edit · c console"
-  font = "Frame Mono Regular 14"
+  font = "Facet Mono Regular 14"
   color = "{{colors.frame}}"
 }
 

@@ -20,7 +20,7 @@ Singleton {
     readonly property color text: "{{colors.text}}"
     readonly property color textDim: "{{colors.textDim}}"
     readonly property color muted: "{{colors.muted}}"
-    readonly property color facet: "{{colors.frame}}"
+    readonly property color frame: "{{colors.frame}}"
     readonly property color border: "{{colors.surface2}}"
     readonly property color danger: "{{colors.danger}}"
     readonly property color warn: "{{colors.warn}}"

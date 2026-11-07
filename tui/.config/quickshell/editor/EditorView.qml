@@ -356,7 +356,7 @@ FocusScope {
 
                                     o: project.overlays[index] ?? null
                                     store: project
-                                    facet: frameArea
+                                    frame: frameArea
                                     capture: video
                                     nativeWidth: project.videoWidth
                                     shown: o !== null && root.playhead >= o.start && root.playhead < o.end
